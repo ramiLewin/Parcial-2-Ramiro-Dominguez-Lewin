@@ -5,13 +5,15 @@ using UnityEngine.InputSystem; // nuevo namespace
 
 public class playerCont : MonoBehaviour
 { 
- 
-        [Header("Stats")]
+    [Header("ScriptableObject")]
+    [SerializeField] private PlayerSO playerSO;
+    
+    /*[Header("Stats")]
     [SerializeField] private float vida = 100f;
 
     [Header("Movimiento")]
     [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float rotationSpeed = 10f;
+    [SerializeField] private float rotationSpeed = 10f;]*/
 
     private Rigidbody rb;
     private Transform cam;
@@ -44,7 +46,7 @@ public class playerCont : MonoBehaviour
         if (direccion.magnitude >= 0.1f)
         {
             float targetAngle = Mathf.Atan2(direccion.x, direccion.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
-            float angle = Mathf.LerpAngle(transform.eulerAngles.y, targetAngle, rotationSpeed * Time.deltaTime);
+            float angle = Mathf.LerpAngle(transform.eulerAngles.y, targetAngle, PlayerSO.rotationSpeed * Time.deltaTime);
             transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
             moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
@@ -58,10 +60,10 @@ public class playerCont : MonoBehaviour
 
     private void FixedUpdate()
     {
-        rb.MovePosition(rb.position + moveDir.normalized * moveSpeed * Time.fixedDeltaTime);
+        rb.MovePosition(rb.position + moveDir.normalized * PlayerSO.moveSpeed * Time.fixedDeltaTime);
     }
 
-    public float GetVida() => vida;
+    public float GetVida() => PlayerSO.vida;
 
 }
 
