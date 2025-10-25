@@ -5,9 +5,9 @@ public class PlayerSO : ScriptableObject
 {
 
     [Header("Stats")]
-    [SerializeField] private float vida;
+    [SerializeField] public float vida;
 
     [Header("Movimiento")]
-    [SerializeField] private float moveSpeed;
-    [SerializeField] private float rotationSpeed;
+    [SerializeField] public float moveSpeed;
+    [SerializeField] public float rotationSpeed;
 }

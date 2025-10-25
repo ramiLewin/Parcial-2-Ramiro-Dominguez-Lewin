@@ -5,15 +5,15 @@ using UnityEngine.InputSystem; // nuevo namespace
 
 public class playerCont : MonoBehaviour
 { 
-    [Header("ScriptableObject")]
-    [SerializeField] private PlayerSO playerSO;
-    
-    /*[Header("Stats")]
+    /*[Header("ScriptableObject")]
+    [SerializeField] public PlayerSO playerSO;
+    */
+    [Header("Stats")]
     [SerializeField] private float vida = 100f;
 
     [Header("Movimiento")]
     [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float rotationSpeed = 10f;]*/
+    [SerializeField] private float rotationSpeed = 10f;
 
     private Rigidbody rb;
     private Transform cam;
@@ -34,36 +34,40 @@ public class playerCont : MonoBehaviour
 
     private void Update()
     {
-        // Leer input WASD
-        moveInput = Vector2.zero;
-        if (Keyboard.current.wKey.isPressed) moveInput.y += 1;
-        if (Keyboard.current.sKey.isPressed) moveInput.y -= 1;
-        if (Keyboard.current.dKey.isPressed) moveInput.x += 1;
-        if (Keyboard.current.aKey.isPressed) moveInput.x -= 1;
+    // Leer input WASD
+    moveInput = Vector2.zero;
+    if (Keyboard.current.wKey.isPressed) moveInput.y += 1;
+    if (Keyboard.current.sKey.isPressed) moveInput.y -= 1;
+    if (Keyboard.current.dKey.isPressed) moveInput.x += 1;
+    if (Keyboard.current.aKey.isPressed) moveInput.x -= 1;
 
-        Vector3 direccion = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
+    // Dirección del movimiento relativa a la cámara
+    Vector3 camForward = cam.forward;
+    Vector3 camRight = cam.right;
 
-        if (direccion.magnitude >= 0.1f)
-        {
-            float targetAngle = Mathf.Atan2(direccion.x, direccion.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
-            float angle = Mathf.LerpAngle(transform.eulerAngles.y, targetAngle, PlayerSO.rotationSpeed * Time.deltaTime);
-            transform.rotation = Quaternion.Euler(0f, angle, 0f);
+    camForward.y = 0f;
+    camRight.y = 0f;
 
-            moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-        }
-        else
-        {
-            moveDir = Vector3.zero;
-        }
+    camForward.Normalize();
+    camRight.Normalize();
+
+    Vector3 direccion = (camForward * moveInput.y + camRight * moveInput.x).normalized;
+
+    // Siempre rotar el personaje hacia donde mira la cámara (solo eje Y)
+    Quaternion targetRotation = Quaternion.Euler(0f, cam.eulerAngles.y, 0f);
+    transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+
+    // Si hay movimiento, moverse en la dirección calculada
+    moveDir = direccion;
 
     }
 
     private void FixedUpdate()
     {
-        rb.MovePosition(rb.position + moveDir.normalized * PlayerSO.moveSpeed * Time.fixedDeltaTime);
+        rb.MovePosition(rb.position + moveDir.normalized * moveSpeed * Time.fixedDeltaTime);
     }
 
-    public float GetVida() => PlayerSO.vida;
+    public float GetVida() => vida;
 
 }
 
