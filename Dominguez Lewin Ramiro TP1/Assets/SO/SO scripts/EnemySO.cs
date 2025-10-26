@@ -4,6 +4,6 @@ using UnityEngine;
 public class EnemySO : ScriptableObject
 {
     [Header("Visión")]
-    [SerializeField] private float visionDistancia = 10f;
-    [SerializeField] private float visionAngulo = 90f;
+    [SerializeField] public float visionDistancia = 10f;
+    [SerializeField] public float visionAngulo = 90f;
 }

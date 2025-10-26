@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b621909a7f85be4c9cf181b6173b7e2, type: 3}
   m_Name: EnemyStatsSO
   m_EditorClassIdentifier: 
-  visionDistancia: 10
+  visionDistancia: 5
   visionAngulo: 90

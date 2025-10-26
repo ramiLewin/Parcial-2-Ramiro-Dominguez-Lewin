@@ -5,15 +5,12 @@ using UnityEngine.InputSystem; // nuevo namespace
 
 public class playerCont : MonoBehaviour
 { 
-    /*[Header("ScriptableObject")]
+    [Header("ScriptableObject")]
     [SerializeField] public PlayerSO playerSO;
-    */
+    
     [Header("Stats")]
-    [SerializeField] private float vida = 100f;
+    [SerializeField] public float vida = 100f;
 
-    [Header("Movimiento")]
-    [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float rotationSpeed = 10f;
 
     private Rigidbody rb;
     private Transform cam;
@@ -55,7 +52,7 @@ public class playerCont : MonoBehaviour
 
     // Siempre rotar el personaje hacia donde mira la cámara (solo eje Y)
     Quaternion targetRotation = Quaternion.Euler(0f, cam.eulerAngles.y, 0f);
-    transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+    transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, playerSO.rotationSpeed * Time.deltaTime);
 
     // Si hay movimiento, moverse en la dirección calculada
     moveDir = direccion;
@@ -64,7 +61,7 @@ public class playerCont : MonoBehaviour
 
     private void FixedUpdate()
     {
-        rb.MovePosition(rb.position + moveDir.normalized * moveSpeed * Time.fixedDeltaTime);
+        rb.MovePosition(rb.position + moveDir.normalized * playerSO.moveSpeed * Time.fixedDeltaTime);
     }
 
     public float GetVida() => vida;

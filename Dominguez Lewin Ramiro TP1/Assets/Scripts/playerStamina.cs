@@ -43,13 +43,19 @@ public class playerStamina : MonoBehaviour
     }
 
     // Métodos utilitarios para leer stats
-    public float GetEstamina() => estamina;*/
+    public float GetEstamina() => estamina;
+*/
 
-     [Header("Estamina")]
+    [Header("ScriptableObject")]
+    [SerializeField] public PlayerSO playerSO;
+
+    [Header("Estamina")]
     [SerializeField] private float estamina = 10f;
+    /*
     [SerializeField] private float estaminaMax = 10f;
     [SerializeField] private float regeneracionRate = 1f;  // Cuánto sube por segundo
     [SerializeField] private float drainRate = 2f;  // Cuánto baja por segundo cuando te persiguen
+*/
 
     private bool siendoPerseguido = false;
 
@@ -63,16 +69,16 @@ public class playerStamina : MonoBehaviour
         if (siendoPerseguido)
         {
             // Bajar estamina cuando te persiguen
-            estamina -= drainRate * Time.deltaTime;
+            estamina -= playerSO.drainRate * Time.deltaTime;
         }
         else
         {
             // Regenerar estamina cuando estás seguro
-            estamina += regeneracionRate * Time.deltaTime;
+            estamina += playerSO.regeneracionRate * Time.deltaTime;
         }
 
         // Mantener la estamina entre 0 y el máximo
-        estamina = Mathf.Clamp(estamina, 0f, estaminaMax);
+        estamina = Mathf.Clamp(estamina, 0f, playerSO.estaminaMax);
     }
 
     // El enemigo llama esto cuando empieza a perseguir

@@ -3,7 +3,9 @@ using UnityEngine.InputSystem;
 
 public class enemy : MonoBehaviour
 {
-   
+    [Header("ScriptableObject")]
+    [SerializeField] public EnemySO EnemySO;
+    
     public enum Estado { Idle, Persiguiendo, Muerto }
 
     [Header("Stats")]
@@ -11,8 +13,6 @@ public class enemy : MonoBehaviour
     [SerializeField] private float moveSpeed = 3f;
 
     [Header("Visión")]
-    [SerializeField] private float visionDistancia = 10f;
-    [SerializeField] private float visionAngulo = 90f;
 
 
     public Transform playerRef;
@@ -85,7 +85,7 @@ public class enemy : MonoBehaviour
         float angulo = Vector3.Angle(transform.forward, direccionXZ.normalized);
 
         // Está dentro del cono de visión?
-        return distancia <= visionDistancia && angulo <= visionAngulo / 2f;
+        return distancia <= EnemySO.visionDistancia && angulo <= EnemySO.visionAngulo / 2f;
     }
 
     private void CambiarEstado(Estado nuevoEstado)
@@ -140,13 +140,13 @@ public class enemy : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, visionDistancia);
+        Gizmos.DrawWireSphere(transform.position, EnemySO.visionDistancia);
 
-        Vector3 derecha = Quaternion.Euler(0, visionAngulo / 2, 0) * transform.forward;
-        Vector3 izquierda = Quaternion.Euler(0, -visionAngulo / 2, 0) * transform.forward;
+        Vector3 derecha = Quaternion.Euler(0, EnemySO.visionAngulo / 2, 0) * transform.forward;
+        Vector3 izquierda = Quaternion.Euler(0, -EnemySO.visionAngulo / 2, 0) * transform.forward;
 
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(transform.position, transform.position + derecha * visionDistancia);
-        Gizmos.DrawLine(transform.position, transform.position + izquierda * visionDistancia);
+        Gizmos.DrawLine(transform.position, transform.position + derecha * EnemySO.visionDistancia);
+        Gizmos.DrawLine(transform.position, transform.position + izquierda * EnemySO.visionDistancia);
     }
 }

@@ -1,16 +1,18 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
-
 public class attack : MonoBehaviour
 {
-    [Header("Parámetros de ataque")]
+    
+    [Header("ScriptableObject")]
+    [SerializeField] public PlayerSO playerSO;
+/*    [Header("Parámetros de ataque")]
     public float range = 20f;
     public float cadence = 2f; // disparos por segundo
     public int damage = 8;
 
-    [Header("Visual")]
-    public float lineDuration = 0.2f; // duración de la línea
+    [Header("Visual del ataque")]
+    public float lineDuration = 0.2f; // duración de la línea*/
     public Material lineMaterial; // opcional
 
     private float lastAttackTime = -999f;
@@ -21,7 +23,7 @@ public class attack : MonoBehaviour
         if (!Mouse.current.leftButton.wasPressedThisFrame) return;
 
         // Cadencia
-        float cooldown = (cadence > 0f) ? (1f / cadence) : Mathf.Infinity;
+        float cooldown = (playerSO.cadence > 0f) ? (1f / playerSO.cadence) : Mathf.Infinity;
         if (Time.time - lastAttackTime < cooldown) return;
         lastAttackTime = Time.time;
 
@@ -33,7 +35,7 @@ public class attack : MonoBehaviour
         RaycastHit hitInfo;
         Vector3 endPoint;
 
-        if (Physics.Raycast(origin, direction, out hitInfo, range))
+        if (Physics.Raycast(origin, direction, out hitInfo, playerSO.range))
         {
             endPoint = hitInfo.point;
             Debug.Log($"Impacto en {hitInfo.collider.name}");
@@ -42,13 +44,13 @@ public class attack : MonoBehaviour
             enemy e = hitInfo.collider.GetComponentInParent<enemy>();
             if (e != null)
             {
-                e.RecibirDaño(damage);
+                e.RecibirDaño(playerSO.damage);
                 Debug.Log("Enemigo dañado");
             }
         }
         else
         {
-            endPoint = origin + direction * range;
+            endPoint = origin + direction * playerSO.range;
             Debug.Log("No impactó a nada");
         }
 
@@ -67,7 +69,7 @@ public class attack : MonoBehaviour
         lr.material = lineMaterial != null ? lineMaterial : new Material(Shader.Find("Unlit/Color")) { color = Color.green };
         lr.numCapVertices = 2;
 
-        yield return new WaitForSeconds(lineDuration);
+        yield return new WaitForSeconds(playerSO.lineDuration);
         Destroy(lineObj);
     }
 }
