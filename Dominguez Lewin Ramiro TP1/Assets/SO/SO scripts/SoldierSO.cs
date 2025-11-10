@@ -1,7 +1,7 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "EnemySO", menuName = "Scriptable Objects/EnemySO")]
-public class EnemySO : ScriptableObject
+[CreateAssetMenu(fileName = "SoldierSO", menuName = "Scriptable Objects/SoldierSO")]
+public class SoldierSO : ScriptableObject
 {
     [Header("Visión")]
     [SerializeField] public float visionDistancia = 10f;

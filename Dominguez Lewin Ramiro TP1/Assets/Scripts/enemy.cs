@@ -1,17 +1,19 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class enemy : MonoBehaviour
 {
     [Header("ScriptableObject")]
-    [SerializeField] public EnemySO EnemySO;
+    [SerializeField] public SoldierSO SoldierSO; 
     
-    public enum Estado { Idle, Persiguiendo, Muerto }
+    public enum Estado { Idle, Persiguiendo, Muerto, Damaged}
 
     [Header("Stats")]
     [SerializeField] private int vida = 1;
     [SerializeField] private float moveSpeed = 3f;
-
+    
     [Header("Visión")]
 
 
@@ -19,6 +21,9 @@ public class enemy : MonoBehaviour
     private Transform player;
     private playerStamina playerStamina;
     private Estado estadoActual = Estado.Idle;
+
+    [Header("UI")]
+    [SerializeField] private TextMeshPro estadoText;
 
     private void Start()
     {
@@ -41,6 +46,10 @@ public class enemy : MonoBehaviour
         else
         {
             Debug.LogError("[ENEMY] No se encontró ningún objeto con tag 'Player'.");
+        }
+        if (estadoText != null)
+        {
+            estadoText.text = estadoActual.ToString();
         }
     }
 
@@ -74,6 +83,12 @@ public class enemy : MonoBehaviour
                 // No hacer nada cuando está idle
                 break;
         }
+         // Asegurarse de que el texto mire hacia la cámara
+        if (estadoText != null && Camera.main != null)
+        {
+            estadoText.transform.LookAt(Camera.main.transform);
+            estadoText.transform.Rotate(0, 180, 0);
+        }
     }
 
     private bool DetectarJugador()
@@ -84,11 +99,33 @@ public class enemy : MonoBehaviour
         float distancia = direccionXZ.magnitude;
         float angulo = Vector3.Angle(transform.forward, direccionXZ.normalized);
 
+        bool dentroDelCono = distancia <= SoldierSO.visionDistancia && angulo <= SoldierSO.visionAngulo / 2f;
+ 
+        if (dentroDelCono)
+        {
+            RaycastHit hitInfo;
+
+            // Hacemos un raycast hacia el jugador
+            if (Physics.Raycast(transform.position + Vector3.up * 1.5f, direccionAlJugador.normalized, out hitInfo, SoldierSO.visionDistancia))
+            {
+                // Si lo primero que toca el rayo es el jugador, entonces lo ve
+                if (hitInfo.collider.CompareTag("Player"))
+                {
+                    return true;
+                }
+                else
+                {
+                    // Si golpea otra cosa primero (una pared, etc.), la visión está bloqueada
+                    Debug.DrawLine(transform.position + Vector3.up * 1.5f, hitInfo.point, Color.red);
+                    return false;
+                }
+            }
+        }
         // Está dentro del cono de visión?
-        return distancia <= EnemySO.visionDistancia && angulo <= EnemySO.visionAngulo / 2f;
+        return distancia <= SoldierSO.visionDistancia && angulo <= SoldierSO.visionAngulo / 2f;
     }
 
-    private void CambiarEstado(Estado nuevoEstado)
+    /*private void CambiarEstado(Estado nuevoEstado)
     {
         // Solo cambiar si es diferente
         if (estadoActual == nuevoEstado) return;
@@ -108,7 +145,35 @@ public class enemy : MonoBehaviour
                 playerStamina.DetenerPersecucion();
             }
         }
+    }*/
+    private void CambiarEstado(Estado nuevoEstado)
+{
+    // Solo cambiar si es diferente
+    if (estadoActual == nuevoEstado) return;
+
+    Estado estadoAnterior = estadoActual;
+    estadoActual = nuevoEstado;
+
+    Debug.Log($"[ENEMY] Estado cambiado de {estadoAnterior} → {estadoActual}");
+    
+    if (estadoText != null)
+        {
+            estadoText.text = estadoActual.ToString();
+        }
+    // Notificar al player según el nuevo estado
+    if (playerStamina != null)
+    {
+        if (estadoActual == Estado.Persiguiendo)
+        {
+            playerStamina.IniciarPersecucion();
+        }
+        else
+        {
+            playerStamina.DetenerPersecucion();
+        }
     }
+}
+
 
     private void PerseguirJugador()
     {
@@ -128,25 +193,40 @@ public class enemy : MonoBehaviour
         if (estadoActual == Estado.Muerto) return;
 
         vida -= cantidad;
+        // Guardar el estado anterior
+        Estado estadoAnterior = estadoActual;
 
+        // Cambiar temporalmente a "Damaged"
+        CambiarEstado(Estado.Damaged);
+
+        // Volver al estado anterior después de un instante
+        StartCoroutine(VolverAEstadoAnterior(estadoAnterior));
         if (vida <= 0)
         {
             CambiarEstado(Estado.Muerto);
             Destroy(gameObject);
         }
     }
+    
+    private IEnumerator VolverAEstadoAnterior(Estado estadoAnterior)
+    {
+        // Pequeña pausa visual (puedes ajustar el tiempo)
+        yield return new WaitForSeconds(1f);
 
+        CambiarEstado(estadoAnterior);
+    }
     // Dibujar el cono de visión en el editor
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, EnemySO.visionDistancia);
+        Gizmos.DrawWireSphere(transform.position, SoldierSO.visionDistancia);
 
-        Vector3 derecha = Quaternion.Euler(0, EnemySO.visionAngulo / 2, 0) * transform.forward;
-        Vector3 izquierda = Quaternion.Euler(0, -EnemySO.visionAngulo / 2, 0) * transform.forward;
+        Vector3 derecha = Quaternion.Euler(0, SoldierSO.visionAngulo / 2, 0) * transform.forward;
+        Vector3 izquierda = Quaternion.Euler(0, -SoldierSO.visionAngulo / 2, 0) * transform.forward;
 
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(transform.position, transform.position + derecha * EnemySO.visionDistancia);
-        Gizmos.DrawLine(transform.position, transform.position + izquierda * EnemySO.visionDistancia);
+        Gizmos.DrawLine(transform.position, transform.position + derecha * SoldierSO.visionDistancia);
+        Gizmos.DrawLine(transform.position, transform.position + izquierda * SoldierSO.visionDistancia);
     }
+
 }

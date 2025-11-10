@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 public class attack : MonoBehaviour
 {
     
@@ -17,19 +18,57 @@ public class attack : MonoBehaviour
 
     private float lastAttackTime = -999f;
 
+    private int balasActuales = 15;         // balas que tiene el cargador
+    private int balasMaximas = 15;          // capacidad del cargador --> pasar al SO
+
+    [Header("UI")]
+    [SerializeField] private TextMeshProUGUI ammoText;
+ 
+
+    private void Start()
+    {
+        ActualizarUI();
+        
+    }
     private void Update()
     {
+        // Recargar con R
+        if (Keyboard.current.rKey.wasPressedThisFrame)
+        {
+            if (balasActuales < balasMaximas)
+            {
+                balasActuales = balasMaximas;
+                Debug.Log($"Recargado. Balas actuales: {balasActuales}/{balasMaximas}");
+                //ActualizarUI; --> no funciona por algún motivo cuando está dentro de este if
+                ActualizarUI();
+                
+            }
+            else
+            {
+                Debug.Log("Cargador lleno. No se puede recargar.");
+            }
+        }
+
         if (Mouse.current == null) return;
         if (!Mouse.current.leftButton.wasPressedThisFrame) return;
+        // Verificar si hay balas disponibles
+        if (balasActuales <= 0)
+        {
+            Debug.Log("Sin balas. Recarga con 'R'.");
+            return;
+        }
 
         // Cadencia
         float cooldown = (playerSO.cadence > 0f) ? (1f / playerSO.cadence) : Mathf.Infinity;
         if (Time.time - lastAttackTime < cooldown) return;
         lastAttackTime = Time.time;
-
+        // Disminuir una bala al disparar
+        balasActuales--;
+        Debug.Log($"Disparo. Balas restantes: {balasActuales}/{balasMaximas}");
+        ActualizarUI();
         Debug.Log("disparo");
 
-        Vector3 origin = transform.position + Vector3.up * 1.5f; // un poco más alto (como la altura del arma)
+        Vector3 origin = transform.position + Vector3.up * 1.5f;
         Vector3 direction = transform.forward;
 
         RaycastHit hitInfo;
@@ -46,6 +85,7 @@ public class attack : MonoBehaviour
             {
                 e.RecibirDaño(playerSO.damage);
                 Debug.Log("Enemigo dañado");
+
             }
         }
         else
@@ -71,5 +111,12 @@ public class attack : MonoBehaviour
 
         yield return new WaitForSeconds(playerSO.lineDuration);
         Destroy(lineObj);
+    }
+    private void ActualizarUI()
+    {
+        if (ammoText != null)
+        {
+            ammoText.text = $"balas: {balasActuales} / {balasMaximas}";
+        }
     }
 }
