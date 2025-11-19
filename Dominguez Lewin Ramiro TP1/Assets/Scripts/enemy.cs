@@ -105,15 +105,10 @@ public class enemy : MonoBehaviour
 
     // Detectar si el player está en el cono de visión
     bool playerVisible = DetectarJugador();
-
-    // Cambiar estado según si ve al player
     if (playerVisible)
     {
-        CambiarEstado(Estado.Persiguiendo);
-    }
-    else
-    {
-        CambiarEstado(Estado.Idle);
+        if (estadoActual != Estado.Persiguiendo)
+            CambiarEstado(Estado.Persiguiendo);
     }
 
     // Ejecutar comportamiento según el estado actual
