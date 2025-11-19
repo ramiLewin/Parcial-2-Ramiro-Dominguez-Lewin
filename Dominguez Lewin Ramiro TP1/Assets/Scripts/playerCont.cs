@@ -38,9 +38,9 @@ public class playerCont : MonoBehaviour
 
     private void Update()
     {
-        // Detectar si se mantiene presionada la tecla C
+        // Detectar si se mantiene presionada la tecla C o Ctrl
         isCrouching = Keyboard.current.cKey.isPressed;
-
+        isCrouching = Keyboard.current.ctrlKey.isPressed;
         // Cambiar escala y velocidad según el estado
         if (isCrouching)
         {
